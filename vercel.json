@@ -1,13 +1,4 @@
 {
-  "name": "semob-dashboards",
-  "version": 2,
-  "buildCommand": "echo 'Static site'",
-  "outputDirectory": ".",
-  "framework": "static",
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/index.html"
-    }
-  ]
+  "buildCommand": "echo 'Building static site'",
+  "framework": null
 }
