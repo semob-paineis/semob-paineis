@@ -1,7 +1,6 @@
 {
   "name": "semob-dashboards",
   "version": 2,
-  "public": true,
   "buildCommand": "echo 'Static site'",
   "outputDirectory": ".",
   "framework": "static",
@@ -10,6 +9,5 @@
       "source": "/",
       "destination": "/index.html"
     }
-  ],
-  "env": {}
+  ]
 }
