@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1.8 Renovação de Frota Privada — SEMOB</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#fff; --ink:#0e1a2b; --ink-soft:#2c3e54;
+  --muted:#5a6470; --muted-2:#8390a0; --line:#dde4ee; --line-soft:#eef2f8;
+  --brand:#003D7A; --brand-dark:#001D40; --brand-light:#1158A8; --brand-tint:#E5EEF7;
+  --ok:#1E7A3D; --ok-bg:#E6F2EA; --ok-soft:#6BAD45;
+  --warn:#B57400; --warn-bg:#FFF4D6; --err:#A52929; --err-bg:#FBE6E6; --err-soft:#C73E3E;
+  --info:#0E5F9E; --info-bg:#E1EEFB; --gold:#C49A2B; --gold-bg:#FBF0D2;
+  --radius:12px; --radius-sm:8px; --radius-lg:18px;
+  --shadow-sm:0 2px 8px rgba(0,29,64,.06); --shadow:0 6px 22px rgba(0,29,64,.10);
+  --shadow-lg:0 14px 50px rgba(0,29,64,.18); --transition:.16s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI','Inter','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:13px}
+h1,h2,h3,h4,h5{font-family:'Cambria','Georgia','Times New Roman',serif;font-weight:700;line-height:1.2}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;padding:8px 16px;border-radius:6px;transition:var(--transition)}
+
+.shell-header{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand) 60%,var(--brand-light) 100%);color:#fff;padding:14px 32px;box-shadow:0 4px 14px rgba(0,0,0,.30);position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.shell-brand{display:flex;align-items:center;gap:16px}
+.shell-logo{width:54px;height:54px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--brand);letter-spacing:-.5px;flex-shrink:0;line-height:1.05;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.shell-title-block{display:flex;flex-direction:column;gap:2px}
+.shell-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;opacity:.78;font-weight:600}
+.shell-title{font-family:'Cambria','Georgia',serif;font-size:22px;font-weight:700;line-height:1.15;letter-spacing:.2px}
+.shell-subtitle{font-size:12.5px;opacity:.85;font-weight:400;letter-spacing:.2px}
+.shell-meta{text-align:right;display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.10);padding:9px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.18)}
+.shell-meta .sm-eye{font-size:9.5px;text-transform:uppercase;letter-spacing:1.4px;opacity:.78;font-weight:600}
+.shell-meta .sm-strong{font-size:15px;font-weight:700;color:#7ed4f0;line-height:1.1}
+.shell-meta .sm-detail{font-size:11px;opacity:.82;margin-top:2px}
+
+.section-banner{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-light) 100%);color:#fff;border-radius:var(--radius-lg);padding:22px 28px;margin-bottom:22px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.section-banner .sb-text{flex:1 1 380px}
+.section-banner .sb-eye{font-size:10px;text-transform:uppercase;letter-spacing:2px;opacity:.78;font-weight:700;margin-bottom:5px}
+.section-banner h2{font-family:'Cambria',serif;font-size:24px;font-weight:700;margin-bottom:6px;letter-spacing:.2px}
+.section-banner .sb-desc{font-size:12.5px;opacity:.92;line-height:1.5}
+.section-banner .sb-kpi{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);border-radius:14px;padding:14px 22px;text-align:center;min-width:180px}
+.section-banner .sb-kpi .sb-k-big{font-size:30px;font-weight:800;line-height:1;font-family:'Cambria',serif}
+.section-banner .sb-kpi .sb-k-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:1.5px;opacity:.85;margin-top:5px}
+
+.subsection{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.subsection-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--brand-tint)}
+.subsection-head .ss-num{background:var(--brand);color:#fff;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;font-family:'Cambria',serif;flex-shrink:0;box-shadow:var(--shadow-sm)}
+.subsection-head .ss-title{flex:1}
+.subsection-head h3{font-size:17px;color:var(--brand);font-weight:700;letter-spacing:.1px}
+.subsection-head .ss-meta{font-size:11px;color:var(--muted);margin-top:2px;font-family:'Segoe UI',sans-serif;font-weight:500}
+.subsection-head .ss-slide-ref{font-size:10px;padding:4px 10px;border-radius:999px;background:var(--brand-tint);color:var(--brand);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.kpi-card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--brand);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);position:relative}
+.kpi-card.ok{border-top-color:var(--ok-soft)}
+.kpi-card.warn{border-top-color:var(--gold)}
+.kpi-card.info{border-top-color:var(--brand-light)}
+.kpi-card .kp-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;margin-bottom:6px}
+.kpi-card .kp-value{font-family:'Cambria',serif;font-size:28px;font-weight:800;color:var(--brand);line-height:1;margin-bottom:6px}
+.kpi-card.ok .kp-value{color:var(--ok)}
+.kpi-card.warn .kp-value{color:var(--gold)}
+.kpi-card.info .kp-value{color:var(--brand-light)}
+.kpi-card .kp-sub{font-size:11.5px;color:var(--muted)}
+.kpi-card .kp-mini{font-size:10.5px;color:var(--muted-2);margin-top:5px;line-height:1.4}
+
+.grid-2col{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin-bottom:18px}
+@media(max-width:1100px){.grid-2col{grid-template-columns:1fr}}
+
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;max-height:540px}
+table.data{width:100%;border-collapse:collapse;background:#fff;font-size:12px}
+table.data th{position:sticky;top:0;background:var(--brand);color:#fff;padding:11px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-right:1px solid rgba(255,255,255,.10);z-index:1}
+table.data th.num,table.data td.num{text-align:right}
+table.data tbody td{padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top;line-height:1.4}
+table.data tbody tr:nth-child(even){background:#fafcff}
+table.data tbody tr:hover{background:#f0f6fc}
+table.data tr.total{background:var(--brand-tint)!important;font-weight:800}
+table.data tr.total td{border-top:2px solid var(--brand);color:var(--brand);font-size:13px}
+
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm)}
+.chart-card h4{font-family:'Cambria',serif;font-size:14px;color:var(--brand);margin-bottom:3px;font-weight:700}
+.chart-card .chart-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.chart-wrap{position:relative;height:280px}
+.chart-wrap canvas{max-height:280px}
+
+.toolbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap}
+.toolbar button{background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:var(--shadow-sm)}
+.toolbar button:hover{background:var(--brand-tint);border-color:var(--brand)}
+
+main{padding:20px 28px 50px;max-width:1600px;margin:0 auto}
+
+.shell-footer{background:var(--brand-dark);color:rgba(255,255,255,.85);padding:24px 32px;font-size:11.5px;line-height:1.7;margin-top:40px}
+.shell-footer .sf-info{max-width:1600px;margin:0 auto;text-align:center;opacity:.8}
+
+@media(max-width:768px){
+  .shell-header{padding:10px 16px;flex-direction:column;align-items:flex-start}
+  .shell-title{font-size:17px}
+  main{padding:14px 16px 40px}
+  .section-banner{padding:16px 18px;flex-direction:column}
+  .section-banner h2{font-size:19px}
+  .subsection{padding:16px 16px}
+  .toolbar{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header class="shell-header">
+  <div class="shell-brand">
+    <div class="shell-logo">MCID<br>SEMOB</div>
+    <div class="shell-title-block">
+      <div class="shell-eyebrow">Ministério das Cidades · Secretaria Nacional de Mobilidade Urbana</div>
+      <div class="shell-title">1.8 — Renovação de Frota Privada</div>
+      <div class="shell-subtitle">Novo PAC SEMOB · Mobilidade Urbana Sustentável</div>
+    </div>
+  </div>
+  <div class="shell-meta">
+    <div class="sm-eye">Data de Referência</div>
+    <div class="sm-strong">31/03/2026</div>
+    <div class="sm-detail">Apresentado em: <strong>08/05/2026</strong></div>
+  </div>
+</header>
+
+<main>
+
+  <div class="section-banner">
+    <div class="sb-text">
+      <div class="sb-eye">Seção 1.8 — Apresentação</div>
+      <h2>Renovação de Frota Privada</h2>
+      <div class="sb-desc">Acompanhamento de operações de renovação de frota de transporte coletivo urbano em empresas privadas. Evolução de valores selecionados, contratados e desembolsados.</div>
+    </div>
+    <div class="sb-kpi"><div class="sb-k-big">6.516</div><div class="sb-k-lbl">Ônibus Previstos</div></div>
+  </div>
+
+  <div class="toolbar">
+    <button onclick="exportarCSV()">📥 Exportar CSV</button>
+    <button onclick="window.print()">🖨️ Imprimir</button>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-head">
+      <div class="ss-num">1</div>
+      <div class="ss-title">
+        <h3>Composição Total da Frota</h3>
+        <div class="ss-meta">Divisão entre ônibus elétricos e Euro 6 — Total de 6.516 unidades</div>
+      </div>
+      <div class="ss-slide-ref">Slide 10</div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="chart-card">
+        <h4>Distribuição por Tipo de Ônibus</h4>
+        <div class="chart-sub">Quantidade total de ônibus selecionados (6.516 unidades)</div>
+        <div class="chart-wrap"><canvas id="chart-composicao"></canvas></div>
+      </div>
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kp-label">Ônibus Euro 6</div>
+          <div class="kp-value">6.282</div>
+          <div class="kp-sub">unidades</div>
+          <div class="kp-mini">96,4% do total</div>
+        </div>
+        <div class="kpi-card info">
+          <div class="kp-label">Ônibus Elétricos</div>
+          <div class="kp-value">234</div>
+          <div class="kp-sub">unidades</div>
+          <div class="kp-mini">3,6% do total</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-head">
+      <div class="ss-num">2</div>
+      <div class="ss-title">
+        <h3>Evolução por Ano</h3>
+        <div class="ss-meta">Acompanhamento de valores selecionados, contratados e desembolsados · Data-base 31/03/2026</div>
+      </div>
+      <div class="ss-slide-ref">Slide 10</div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Ano</th>
+            <th class="num">Propostas</th>
+            <th>Equipamentos</th>
+            <th class="num">Sel. (R$ bi)</th>
+            <th class="num">Contr. (R$ bi)</th>
+            <th class="num">Desemb. (R$ bi)</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-refrota-priv"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-head">
+      <div class="ss-num">3</div>
+      <div class="ss-title">
+        <h3>Evolução Financeira por Ano</h3>
+        <div class="ss-meta">Valores selecionado, contratado e desembolsado em bilhões de reais</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4>Evolução Selecionado, Contratado e Desembolsado</h4>
+      <div class="chart-sub">Representação em R$ bilhões por ano</div>
+      <div class="chart-wrap"><canvas id="chart-refrota-priv"></canvas></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-head">
+      <div class="ss-num">4</div>
+      <div class="ss-title">
+        <h3>Resumo Consolidado</h3>
+        <div class="ss-meta">Totais acumulados da operação</div>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kp-label">Total de Propostas</div>
+        <div class="kp-value">212</div>
+        <div class="kp-sub">operações</div>
+      </div>
+      <div class="kpi-card ok">
+        <div class="kp-label">Valor Selecionado</div>
+        <div class="kp-value">5,68</div>
+        <div class="kp-sub">R$ bilhões</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kp-label">Valor Contratado</div>
+        <div class="kp-value">2,83</div>
+        <div class="kp-sub">R$ bilhões</div>
+      </div>
+      <div class="kpi-card info">
+        <div class="kp-label">Valor Desembolsado</div>
+        <div class="kp-value">2,09</div>
+        <div class="kp-sub">R$ bilhões</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="shell-footer">
+  <div class="sf-info">
+    <strong>Painel de Monitoramento — Ministério das Cidades</strong><br>
+    Secretaria Nacional de Mobilidade Urbana · Novo PAC SEMOB<br>
+    <small>Referência: 31/03/2026 · Apresentado: 08/05/2026</small>
+  </div>
+</footer>
+
+<script>
+const DATA = {
+  refrota_privado_evolucao: [
+    {ano:"2023",propostas:1,equipamentos:"2 ônibus Euro 6",sel_bi:0.01,cont_bi:0.01,desemb_bi:0.01},
+    {ano:"2024",propostas:33,equipamentos:"991 ônibus Euro 6 + 61 ônibus elétricos",sel_bi:0.93,cont_bi:0.65,desemb_bi:0.61},
+    {ano:"2025",propostas:157,equipamentos:"4.909 ônibus Euro 6 + 20 ônibus elétricos",sel_bi:4.21,cont_bi:1.94,desemb_bi:1.44},
+    {ano:"2026*",propostas:21,equipamentos:"360 ônibus Euro 6 + 153 ônibus elétricos",sel_bi:0.53,cont_bi:0.23,desemb_bi:0.03},
+    {ano:"TOTAL",propostas:212,equipamentos:"6.282 ônibus Euro 6 + 234 ônibus elétricos",sel_bi:5.68,cont_bi:2.83,desemb_bi:2.09,total:true}
+  ]
+};
+
+function fmt2(v){return (v||0).toFixed(2).replace('.',',')}
+function fmtInt(v){return (v||0).toLocaleString('pt-BR')}
+function safe(s){return (s||'').replace(/[<>]/g,c=>({'>':'&gt;','<':'&lt;'}[c]))}
+
+function renderTable(){
+  const tbody = document.getElementById('tbl-refrota-priv');
+  tbody.innerHTML = DATA.refrota_privado_evolucao.map(r => {
+    const cls = r.total ? 'total' : '';
+    return `<tr class="${cls}">
+      <td>${safe(r.ano)}</td>
+      <td class="num">${fmtInt(r.propostas)}</td>
+      <td>${safe(r.equipamentos)}</td>
+      <td class="num">${fmt2(r.sel_bi)}</td>
+      <td class="num">${fmt2(r.cont_bi)}</td>
+      <td class="num">${fmt2(r.desemb_bi)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function initCharts(){
+  if(typeof Chart === 'undefined') return;
+  Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+  Chart.defaults.font.size = 11;
+
+  const chartComposicao = new Chart(document.getElementById('chart-composicao'), {
+    type:'doughnut',
+    data:{
+      labels:['Ônibus Euro 6','Ônibus Elétricos'],
+      datasets:[{
+        data:[6282, 234],
+        backgroundColor:['#D32F2F','#1976D2'],
+        borderColor:'#fff',
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:'72%',
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},padding:12,boxWidth:14}},
+        tooltip:{
+          backgroundColor:'rgba(0,0,0,0.8)',
+          padding:12,
+          titleFont:{size:13,weight:'bold'},
+          bodyFont:{size:12},
+          cornerRadius:8,
+          displayColors:true,
+          callbacks:{
+            label:function(context){
+              const total = 6516;
+              const value = context.parsed;
+              const percentage = ((value/total)*100).toFixed(1);
+              return ` ${context.label}: ${fmtInt(value)} unidades (${percentage}%)`;
+            }
+          }
+        }
+      }
+    },
+    plugins:[{
+      id:'textCenter',
+      beforeDatasetsDraw(chart){
+        const {width,height,ctx} = chart;
+        ctx.restore();
+        const fontSize = (height/200).toFixed(2);
+        ctx.font = `bold ${fontSize*7}px 'Cambria', 'Georgia', serif`;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#003D7A';
+        const text = '6.516';
+        const textX = Math.round((width-ctx.measureText(text).width)/2);
+        const textY = height/2-14;
+        ctx.fillText(text, textX, textY);
+        ctx.font = `normal ${fontSize*2.3}px 'Segoe UI', 'Inter', Arial, sans-serif`;
+        ctx.fillStyle = '#5a6470';
+        const subtext = 'unidades';
+        const subtextX = Math.round((width-ctx.measureText(subtext).width)/2);
+        const subtextY = height/2+18;
+        ctx.fillText(subtext, subtextX, subtextY);
+        ctx.save();
+      }
+    }]
+  });
+
+  const refrotaData = DATA.refrota_privado_evolucao.filter(r => !r.total);
+  new Chart(document.getElementById('chart-refrota-priv'), {
+    type:'bar',
+    data:{
+      labels:refrotaData.map(r => r.ano),
+      datasets:[
+        {label:'Selecionado',data:refrotaData.map(r => r.sel_bi),backgroundColor:'#003D7A',borderRadius:4},
+        {label:'Contratado',data:refrotaData.map(r => r.cont_bi),backgroundColor:'#6BAD45',borderRadius:4},
+        {label:'Desembolsado',data:refrotaData.map(r => r.desemb_bi),backgroundColor:'#E8A838',borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},padding:10}},
+        tooltip:{
+          backgroundColor:'rgba(0,0,0,0.85)',
+          padding:14,
+          titleFont:{size:12,weight:'bold'},
+          bodyFont:{size:11,color:'#fff'},
+          cornerRadius:6,
+          displayColors:true,
+          callbacks:{
+            label:function(context){
+              return ` ${context.dataset.label}: R$ ${fmt2(context.parsed.y)} bi`;
+            }
+          }
+        }
+      },
+      scales:{
+        y:{
+          ticks:{callback:function(v){return 'R$ '+fmt2(v)}}
+        }
+      }
+    }
+  });
+}
+
+function exportarCSV(){
+  const linhas = ['Ano,Propostas,Equipamentos,Selecionado (R$ bi),Contratado (R$ bi),Desembolsado (R$ bi)'];
+  DATA.refrota_privado_evolucao.forEach(r => {
+    linhas.push(`"${r.ano}","${r.propostas}","${r.equipamentos}","${r.sel_bi}","${r.cont_bi}","${r.desemb_bi}"`);
+  });
+  const csv = linhas.join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'refrota_privado_1.8.csv';
+  link.click();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  renderTable();
+  initCharts();
+  console.log('[SEMOB-1.8] Painel carregado — 6.516 ônibus · 212 propostas');
+});
+</script>
+
+</body>
+</html>
